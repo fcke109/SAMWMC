@@ -311,9 +311,13 @@ const putOnHold = (k) => run(async () => {
   if (!ok) toast('No number is being served right now.');
 });
 const completeCurrent = (k) => { const r = myRoom[k]; return run(() => mutate((s) => { s.stations[k][r].active = null; })); };
-const recallNumber = (k, num) => { const r = myRoom[k]; return run(() => mutate((s) => {
-  const st = s.stations[k][r]; st.hold = st.hold.filter(n => n !== num); st.active = num;
-})); };
+const recallNumber = (k, num) => { const r = myRoom[k]; return run(async () => {
+  const ok = await mutate((s) => {
+    const st = s.stations[k][r]; if (st.active) return false;
+    st.hold = st.hold.filter(n => n !== num); st.active = num; return true;
+  });
+  if (!ok) toast('Press "I have called this number" first.');
+}); };
 const resetAll = () => run(async () => {
   await mutate((s) => {
     for (const k of Object.keys(s.queues)) s.queues[k] = { nextSeq: 1, waiting: [] };
@@ -352,7 +356,7 @@ function stationHTML(k) {
   const roomBar = s.rooms > 1 ? `<div class="trackbar" role="group" aria-label="Which room is this device?"><span class="bar-lbl">This device is</span>${roomIds(k).map(r =>
     `<button class="track" data-room="${r}" data-station="${k}" aria-pressed="${r === myRoom[k]}">Room ${r.slice(1)}<span class="count">${esc(state.stations[k][r].active || '--')}</span></button>`).join('')}</div>` : '';
   const holds = cur.hold.length
-    ? cur.hold.map(n => `<div class="hold-row"><b>${esc(n)}</b><button class="recall" data-recall="${esc(n)}" data-station="${k}" ${dis()}>Recall</button></div>`).join('')
+    ? cur.hold.map(n => `<div class="hold-row"><b>${esc(n)}</b><button class="recall" data-recall="${esc(n)}" data-station="${k}" ${busy || cur.active ? 'disabled' : ''}>Recall</button></div>`).join('')
     : '<div class="empty">None</div>';
   return `<section class="panel">
     <h2>${esc(roomName(k, myRoom[k]))}</h2>${roomBar}${trackBar}
