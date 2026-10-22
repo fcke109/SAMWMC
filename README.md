@@ -32,13 +32,18 @@ Make sure the `databaseURL` line is included. If Firebase's snippet doesn't have
 
 The `apiKey` in this config is not a password. It's normal for it to be public. The database rules and the staff login are what keep the queue safe.
 
-## Part C: Publish on GitHub Pages
+## Part C: Publish on Firebase Hosting
 
-1. Sign in at https://github.com. Click **+** (top right), then **New repository**. Name it `clinic-queue`, set it to **Public**, and click **Create repository**.
-2. Click **uploading an existing file**. Drag in `index.html` and `README.md`, then click **Commit changes**.
-3. Go to **Settings → Pages**. Under *Build and deployment*, set Source to **Deploy from a branch**, Branch to **main**, and folder to **/ (root)**. Click **Save**.
-4. Wait about 1–2 minutes. Your site will be at:
-   **https://fcke109.github.io/clinic-queue/**
+The site is hosted by Firebase, in the same project as the database. You need the Firebase CLI (`npm install -g firebase-tools`, then `firebase login`).
+
+From this folder, run:
+
+```
+firebase deploy
+```
+
+This publishes `index.html` and the database rules in `database.rules.json`. The site is at:
+**https://samwmc-778b2.web.app/**
 
 ## Station bookmarks
 
@@ -46,14 +51,16 @@ Each link opens straight to that station's screen. Sign in once on each device a
 
 | Station | Link |
 |---|---|
-| Front door screener | https://fcke109.github.io/clinic-queue/#screener |
-| Doctor | https://fcke109.github.io/clinic-queue/#doctor |
-| Nurse (BT / P / M) | https://fcke109.github.io/clinic-queue/#nurse |
-| Physio | https://fcke109.github.io/clinic-queue/#physio |
-| Dentist | https://fcke109.github.io/clinic-queue/#dental |
-| Waiting-room TV | https://fcke109.github.io/clinic-queue/#board |
+| Front door screener | https://samwmc-778b2.web.app/#screener |
+| Doctor | https://samwmc-778b2.web.app/#doctor |
+| Nurse (BT / P / M) | https://samwmc-778b2.web.app/#nurse |
+| Physio | https://samwmc-778b2.web.app/#physio |
+| Dentist | https://samwmc-778b2.web.app/#dental |
+| Waiting-room TV | https://samwmc-778b2.web.app/#board |
+
+**More than one person at a station:** each station has up to 3 rooms, and each room calls its own next patient from the shared queue. Pick the room at the top of the station screen, or bookmark it directly by adding the room number, for example https://samwmc-778b2.web.app/#doctor/2 for Doctor room 2. Each device remembers its room. To change how many rooms a station has, edit `rooms: 3` in the `STATIONS` list in `index.html`.
 
 ## Daily use
 
 - **Start of day:** click **Reset all** and type `RESET` to set every queue back to 001.
-- **Changing the page later:** edit `index.html` on GitHub (pencil icon) and commit. The site updates in about a minute.
+- **Changing the page later:** edit `index.html`, run `firebase deploy`, then commit and push the change to GitHub so the repository matches the live site.
