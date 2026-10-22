@@ -63,4 +63,6 @@ Each link opens straight to that station's screen. Sign in once on each device a
 ## Daily use
 
 - **Start of day:** click **Reset all** and type `RESET` to set every queue back to 001.
+- **Waiting-room TV:** open the **Waiting-room TV** tab, press **Turn on sound** so each call plays a chime and reads the number aloud, then press **Full screen**. Sound has to be turned on again whenever the TV page is reloaded.
+- **Pressed "I have called this number" by mistake?** Press **Undo** in the message at the bottom of the screen within a few seconds.
 - **Changing the page later:** edit `index.html`, run `firebase deploy`, then commit and push the change to GitHub so the repository matches the live site.

@@ -6,138 +6,242 @@
 <title>Clinic Queue</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@500;700&family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@500;700&family=Atkinson+Hyperlegible+Next:wght@400;600;700;800&display=swap">
 <style>
 :root {
-  --bg: #eef2f3; --surface: #ffffff; --surface-2: #f5f8f8; --line: #d3dcde;
-  --fg: #16262b; --muted: #58696e; --accent: #0d6e78;
-  --doc: #1f7a46; --nurse: #5a6872; --physio: #2457b8; --dental: #c2580f;
-  --hold-bg: #fff6dc; --hold-line: #ecd48a; --danger: #b42318; --ok-bg: #e4f4ea; --ok-fg: #155a32;
+  --bg: #f1f5f6; --surface: #ffffff; --surface-2: #f5f8f9; --line: #dce4e7; --line-2: #c3cfd3;
+  --fg: #10232a; --muted: #56676d; --accent: #0b6e78; --ok: #1b7a49;
+  --doc: #1b7a49; --nurse: #6a4bb6; --physio: #2358b6; --dental: #b5530d;
+  --hold-bg: #fff7e0; --hold-line: #ebd28a; --hold-fg: #6e4e00; --danger: #b42318;
+  --shadow: 0 1px 2px rgba(16, 35, 42, .05), 0 6px 20px rgba(16, 35, 42, .06);
   --font-body: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   --font-num: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Consolas, monospace;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1719; --surface: #172327; --surface-2: #1d2c31; --line: #2c3f45;
-    --fg: #e4eef0; --muted: #98aab0; --accent: #4fb5bf;
-    --doc: #3fa56a; --nurse: #7d8c96; --physio: #5b8ae0; --dental: #e07b33;
-    --hold-bg: #2c2717; --hold-line: #5a4c22; --danger: #f07065; --ok-bg: #173325; --ok-fg: #8fe0b0;
+    --bg: #0c1417; --surface: #132026; --surface-2: #18282e; --line: #24363c; --line-2: #344c53;
+    --fg: #e6eff1; --muted: #98abb1; --accent: #4fb5bf; --ok: #4cc483;
+    --hold-bg: #29230f; --hold-line: #5a4a1f; --hold-fg: #f0cd6e; --danger: #f07065;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
     color-scheme: dark;
   }
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.45;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 32px max(16px, env(safe-area-inset-left));
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left));
 }
-button { font: inherit; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-button:disabled { opacity: .55; cursor: progress; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.mono { font-family: var(--font-num); }
+.lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
 
-.topbar { max-width: 960px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-.topbar h1 { font-size: 20px; margin: 0; }
-.top-right { display: flex; gap: 12px; align-items: center; }
-.status { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-.status[data-state="live"] .dot { background: var(--doc); }
+/* ---------- top bar ---------- */
+.topbar { max-width: 1100px; margin: 0 auto 14px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.logo svg { width: 20px; height: 20px; }
+.brand h1 { font-size: 19px; line-height: 1.2; }
+.clock { font-size: 13px; color: var(--muted); }
+.top-right { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.status { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 4px 11px 4px 9px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.status[data-state="live"] .dot { background: var(--ok); }
+.status[data-state="error"] { color: var(--danger); }
 .status[data-state="error"] .dot { background: var(--danger); }
-.link-btn { border: 0; background: none; color: var(--muted); text-decoration: underline; font-size: 13px; padding: 0; }
+.link-btn { border: 0; background: none; color: var(--muted); font-size: 14px; font-weight: 700; padding: 8px 2px; }
+.link-btn:hover { color: var(--fg); text-decoration: underline; }
+.link-btn.danger { color: var(--danger); }
 
-.tabs { max-width: 960px; margin: 0 auto 20px; display: flex; flex-wrap: wrap; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px; }
-.tab { border: 0; background: transparent; color: var(--fg); padding: 10px 14px; border-radius: 7px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; }
-.tab .sw { width: 10px; height: 10px; border-radius: 3px; }
+/* ---------- navigation ---------- */
+.tabs { max-width: 1100px; margin: 0 auto 18px; display: flex; flex-wrap: wrap; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 5px; box-shadow: var(--shadow); }
+.tab { border: 0; background: transparent; color: var(--muted); padding: 9px 14px; border-radius: 10px; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; white-space: nowrap; min-height: 44px; }
+.tab:hover { color: var(--fg); background: var(--surface-2); }
 .tab[aria-selected="true"] { background: var(--fg); color: var(--bg); }
-.tab .count { font-family: var(--font-num); font-size: 12px; background: var(--surface-2); color: var(--muted); border-radius: 99px; padding: 1px 7px; }
-.tab.reset { margin-left: auto; color: var(--danger); }
+.sw { width: 10px; height: 10px; border-radius: 3px; background: var(--st); flex: none; }
+.count { font-family: var(--font-num); font-size: 12px; font-weight: 700; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 0 8px; min-width: 26px; text-align: center; }
+.tab[aria-selected="true"] .count { background: transparent; color: var(--bg); border-color: currentColor; }
 
-.panel { max-width: 620px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-.panel.wide { max-width: 960px; }
-.panel h2 { margin: 0; font-size: 22px; }
-.panel .sub { margin: -10px 0 0; color: var(--muted); font-size: 14px; }
-
-.issue-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-@media (max-width: 520px) { .issue-grid { grid-template-columns: 1fr; } }
-.issue { border: 0; color: #fff; border-radius: 9px; padding: 16px; text-align: left; display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 18px; }
-.issue small { font-weight: 400; font-size: 13px; opacity: .9; }
-.c-D { background: var(--doc); } .c-N { background: var(--nurse); } .c-PT { background: var(--physio); } .c-Den { background: var(--dental); }
-
-.ticket { background: var(--ok-bg); color: var(--ok-fg); border-radius: 10px; padding: 18px; text-align: center; }
-.lbl { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
-.ticket .num { font-family: var(--font-num); font-size: 52px; font-weight: 700; line-height: 1.1; }
-
-.trackbar { display: flex; flex-wrap: wrap; gap: 6px; }
-.track { border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 8px; padding: 8px 12px; font-weight: 600; }
-.track[aria-pressed="true"] { border-color: var(--fg); background: var(--fg); color: var(--bg); }
-.bar-lbl { align-self: center; font-size: 13px; color: var(--muted); margin-right: 4px; }
-.track .count { font-family: var(--font-num); font-weight: 500; margin-left: 4px; }
-
-.waiting { background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 12px 14px; }
-.waiting-head { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; align-items: center; }
-.chip { font-family: var(--font-num); font-weight: 700; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
-.chip:first-child { border-color: var(--accent); color: var(--accent); }
-.empty { color: var(--muted); font-size: 14px; }
-
-.now { text-align: center; border: 2px dashed var(--line); border-radius: 10px; padding: 14px; }
-.now .lbl { color: var(--muted); }
-.now .num { font-family: var(--font-num); font-size: 56px; font-weight: 700; line-height: 1.15; }
-.now.idle .num { color: var(--muted); }
-
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.act { border: 0; border-radius: 9px; padding: 15px; font-weight: 700; font-size: 16px; }
-.act.call { background: var(--doc); color: #fff; }
-.act.hold { background: var(--dental); color: #fff; }
-.act.done { grid-column: 1 / -1; background: var(--fg); color: var(--bg); }
-
-.holds { background: var(--hold-bg); border: 1px solid var(--hold-line); border-radius: 9px; padding: 12px 14px; }
-.holds h3 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.hold-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-top: 1px solid var(--hold-line); }
-.hold-row:first-of-type { border-top: 0; }
-.hold-row b { font-family: var(--font-num); }
-.recall { border: 0; background: var(--physio); color: #fff; border-radius: 6px; padding: 5px 12px; font-size: 14px; font-weight: 600; }
-
-.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.bcell { border-radius: 10px; padding: 16px; color: #fff; display: flex; flex-direction: column; gap: 4px; }
-.bcell .room { font-size: 15px; font-weight: 600; }
-.bcell .num { font-family: var(--font-num); font-size: 48px; font-weight: 700; line-height: 1.1; }
-.bcell .wait { font-size: 13px; opacity: .9; }
-.bcell.flash { animation: flash 1.2s ease-out 3; }
-@keyframes flash { 50% { filter: brightness(1.35); } }
-@media (prefers-reduced-motion: reduce) { .bcell.flash { animation: none; } }
-
-.notice { max-width: 960px; margin: 0 auto 16px; border-radius: 9px; padding: 12px 14px; border: 1px solid var(--hold-line); background: var(--hold-bg); font-size: 14px; }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; max-width: calc(100% - 32px); }
-
-.login { max-width: 380px; }
-.login label { font-weight: 600; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
-.login input, .modal input { font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--fg); }
-.login .err { color: var(--danger); font-size: 14px; margin: 0; }
-
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; z-index: 20; }
-.modal { background: var(--surface); color: var(--fg); border-radius: 12px; padding: 22px; max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
-.modal h3 { margin: 0; color: var(--danger); }
-.modal input { font-family: var(--font-num); }
-.row { display: flex; gap: 8px; justify-content: flex-end; }
-.btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 8px; padding: 9px 14px; font-weight: 600; }
+/* ---------- shared layout ---------- */
+.screen { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+.card-head { margin-bottom: 18px; }
+.card-head h2 { font-size: 22px; }
+.card-head p { color: var(--muted); margin-top: 4px; }
+.empty { color: var(--muted); font-size: 15px; }
+.btn { border: 1px solid var(--line-2); background: var(--surface); color: var(--fg); border-radius: 10px; padding: 9px 16px; font-weight: 700; min-height: 42px; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* ---------- screener ---------- */
+.screener-grid { grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); }
+.issue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.issue { border: 0; border-radius: 14px; background: var(--st); color: #fff; text-align: left; padding: 16px 18px; min-height: 136px; display: flex; flex-direction: column; gap: 2px; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .16); transition: transform .08s, filter .15s; }
+.issue:hover:not(:disabled) { filter: brightness(1.08); }
+.issue:active:not(:disabled) { transform: scale(.98); }
+.issue-group { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; opacity: .85; }
+.issue-title { font-size: 21px; font-weight: 800; line-height: 1.2; }
+.issue-meta { margin-top: auto; padding-top: 12px; display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.issue-meta b { font-family: var(--font-num); }
+.ticket-card { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 16px; }
+.ticket { container-type: inline-size; border-radius: 14px; padding: 22px 18px; text-align: center; background: var(--surface-2); border: 3px solid var(--st); }
+.ticket .lbl { color: var(--fg); }
+.ticket-num { font-family: var(--font-num); font-weight: 700; font-size: 56px; font-size: clamp(40px, 22cqi, 96px); line-height: 1.05; margin: 10px 0 6px; letter-spacing: .02em; }
+.ticket-svc { font-size: 19px; font-weight: 800; }
+.ticket-ahead { color: var(--muted); margin-top: 2px; }
+.ticket.fresh { animation: pop .35s ease-out; }
+@keyframes pop { from { transform: scale(.95); opacity: .3; } }
+.ticket.blank { border: 2px dashed var(--line-2); }
+.ticket.blank p { color: var(--muted); margin-top: 8px; }
+.issued h3 { margin-bottom: 4px; }
+.issued-row { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.issued-row b { font-family: var(--font-num); min-width: 76px; }
+.issued-row .t { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+/* ---------- station ---------- */
+.station-grid { grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); }
+.station-main { display: flex; flex-direction: column; gap: 18px; border-top: 6px solid var(--st); }
+.station-head { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.eyebrow { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.station-head h2 { font-size: 26px; line-height: 1.2; margin-top: 2px; }
+.rooms { display: flex; flex-direction: column; gap: 4px; }
+.rooms .lbl { letter-spacing: .06em; }
+.seg { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.seg.wide > * { flex: 1; }
+.seg-btn { border: 0; background: transparent; color: var(--muted); border-radius: 9px; padding: 6px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25; min-width: 72px; min-height: 46px; }
+.seg-btn b { font-size: 14px; color: var(--fg); }
+.seg-btn small { font-size: 12px; }
+.seg-btn small.mono { font-size: 13px; }
+.seg-btn[aria-pressed="true"] { background: var(--surface); box-shadow: 0 0 0 2px var(--st); }
+.seg-btn[aria-pressed="true"] small { color: var(--fg); }
+.serving { container-type: inline-size; text-align: center; border-radius: 14px; padding: 24px 16px 22px; background: var(--surface-2); border: 2px solid var(--line); }
+.serving.on { border-color: var(--st); background: var(--surface); box-shadow: inset 0 0 0 999px rgba(127, 127, 127, .04); }
+.big-num { font-family: var(--font-num); font-weight: 700; font-size: 64px; font-size: clamp(56px, 18cqi, 136px); line-height: 1.05; margin: 8px 0 12px; letter-spacing: .02em; }
+.big-num.idle { color: var(--line-2); }
+.hint { color: var(--muted); max-width: 48ch; margin: 0 auto; font-size: 15px; }
+.hint b { color: var(--fg); }
+.actions { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.actions.one { grid-template-columns: 1fr; }
+.btn-xl { border: 0; border-radius: 14px; min-height: 70px; padding: 12px 18px; font-size: 19px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+.btn-xl.primary { background: var(--st); color: #fff; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18); }
+.btn-xl.primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-xl.secondary { background: var(--hold-bg); color: var(--hold-fg); border: 2px solid var(--hold-line); }
+.btn-xl .mono { background: rgba(255, 255, 255, .2); border-radius: 8px; padding: 2px 10px; }
+.btn-xl.off, .btn-xl.off:disabled { background: var(--surface-2); color: var(--muted); border: 2px dashed var(--line-2); box-shadow: none; opacity: 1; }
+.side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.side-h { display: flex; align-items: center; gap: 8px; font-size: 16px; margin-bottom: 12px; }
+.side-h .count { margin-left: auto; }
+.queue { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.queue li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.queue li b { font-family: var(--font-num); font-size: 17px; }
+.queue li .pos { color: var(--muted); font-size: 13px; min-width: 18px; }
+.queue li.first { border: 2px solid var(--st); background: var(--surface); }
+.tag { margin-left: auto; font-size: 12px; font-weight: 700; color: #fff; background: var(--st); border-radius: 99px; padding: 2px 10px; }
+.more, .note { color: var(--muted); font-size: 14px; margin-top: 10px; }
+.hold-card { background: var(--hold-bg); border-color: var(--hold-line); }
+.hold-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--hold-line); }
+.hold-row:first-of-type { border-top: 0; padding-top: 0; }
+.hold-row b { font-family: var(--font-num); font-size: 17px; }
+
+/* ---------- waiting-room board (always dark, for TVs) ---------- */
+.board {
+  --b-bg: #08161b; --b-tile: #102429; --b-line: #1f3b42; --b-fg: #f2f8f9; --b-muted: #a3bac0;
+  max-width: 1100px; margin: 0 auto; background: var(--b-bg); color: var(--b-fg); color-scheme: dark;
+  border-radius: 18px; padding: clamp(16px, 2.5vw, 36px); display: flex; flex-direction: column; gap: clamp(14px, 2vw, 28px);
+}
+.board-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.board-head h2 { font-size: clamp(28px, 3.6vw, 56px); line-height: 1.1; }
+.board-head p { color: var(--b-muted); font-size: clamp(15px, 1.6vw, 24px); margin-top: 6px; }
+.board-time { text-align: right; }
+#board-clock { font-family: var(--font-num); font-weight: 700; font-size: clamp(28px, 3.6vw, 60px); line-height: 1; }
+#board-date { color: var(--b-muted); font-size: clamp(13px, 1.3vw, 20px); margin-top: 6px; }
+.board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: clamp(10px, 1.5vw, 20px); }
+.btile { container-type: inline-size; background: var(--b-tile); border: 1px solid var(--b-line); border-top: 10px solid var(--st); border-radius: 14px; padding: clamp(14px, 1.6vw, 24px); display: flex; flex-direction: column; gap: 10px; }
+.btile header { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.btile h3 { font-size: clamp(17px, 1.8vw, 28px); line-height: 1.2; }
+.btile header span { color: var(--b-muted); font-size: clamp(13px, 1.2vw, 18px); }
+.brow { display: flex; flex-direction: column; border-radius: 10px; padding: 4px 10px; margin: 0 -10px; }
+.broom { color: var(--b-muted); font-weight: 700; font-size: clamp(14px, 1.4vw, 22px); }
+.bnum { font-family: var(--font-num); font-weight: 700; font-size: 44px; font-size: clamp(36px, 20cqi, 128px); line-height: 1.05; letter-spacing: .02em; }
+.brow.idle .bnum { color: var(--b-line); }
+.brow.flash { animation: flash 1s ease-in-out 5; }
+@keyframes flash { 50% { background: var(--st); } }
+.board-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--b-line); padding-top: clamp(12px, 1.5vw, 22px); }
+.recent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.recent .lbl { color: var(--b-muted); margin-right: 4px; }
+.rchip { background: var(--b-tile); border: 1px solid var(--b-line); border-radius: 99px; padding: 4px 12px; font-size: clamp(13px, 1.2vw, 19px); color: var(--b-muted); }
+.rchip b { font-family: var(--font-num); color: var(--b-fg); margin-right: 4px; }
+.rnone { color: var(--b-muted); font-size: 14px; }
+.board-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.bbtn { border: 1px solid var(--b-line); background: var(--b-tile); color: var(--b-fg); border-radius: 10px; padding: 9px 14px; font-weight: 700; font-size: 14px; min-height: 42px; }
+.bbtn[aria-pressed="true"] { border-color: #4cc483; }
+body.tv { padding: 0; }
+body.tv .topbar, body.tv .tabs, body.tv .notice { display: none; }
+body.tv .board { max-width: none; min-height: 100vh; border-radius: 0; }
+body.tv .board-grid { flex: 1; align-content: center; }
+body.tv .board-tools { opacity: .3; transition: opacity .2s; }
+body.tv .board-tools:hover, body.tv .board-tools:focus-within { opacity: 1; }
+
+/* ---------- sign-in, notices, toast, modal ---------- */
+.login { max-width: 400px; margin: 6vh auto 0; display: flex; flex-direction: column; gap: 14px; }
+.login .logo { width: 48px; height: 48px; }
+.login h2 { font-size: 24px; }
+.login .muted { color: var(--muted); margin-top: -8px; }
+.login label { font-weight: 700; font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+.login .btn { min-height: 50px; font-size: 17px; }
+input { font: inherit; padding: 11px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface-2); color: var(--fg); min-height: 46px; }
+.err { color: var(--danger); font-size: 14px; font-weight: 600; }
+.notice { max-width: 1100px; margin: 0 auto 16px; border-radius: 12px; padding: 12px 16px; border: 1px solid var(--hold-line); background: var(--hold-bg); color: var(--hold-fg); font-weight: 600; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 30; background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-size: 15px; font-weight: 600; max-width: calc(100% - 32px); display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, .25); }
+.toast button { border: 1px solid currentColor; background: transparent; color: inherit; font-weight: 800; border-radius: 8px; padding: 5px 12px; margin: -4px -6px -4px 0; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .5); display: grid; place-items: center; padding: 16px; z-index: 40; }
+.modal { background: var(--surface); color: var(--fg); border-radius: 16px; padding: 24px; max-width: 440px; width: 100%; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
+.modal h3 { font-size: 20px; color: var(--danger); }
+.modal input { font-family: var(--font-num); }
+.row { display: flex; gap: 8px; justify-content: flex-end; }
+
+@media (max-width: 860px) {
+  .screener-grid, .station-grid { grid-template-columns: 1fr; }
+  .ticket-card { position: static; }
+}
+@media (max-width: 520px) {
+  .card { padding: 18px; }
+  .actions { grid-template-columns: 1fr; }
+  .issue-grid { grid-template-columns: 1fr 1fr; }
+  .issue { min-height: 120px; padding: 14px; }
+  .issue-title { font-size: 18px; }
+  .issue-meta { flex-direction: column; gap: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .issue, .ticket.fresh { animation: none; transition: none; }
+  .brow.flash { animation: none; background: var(--st); }
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <h1>Clinic Queue</h1>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></svg></span>
+    <div><h1>Clinic Queue</h1><div class="clock" id="clock"></div></div>
+  </div>
   <div class="top-right">
     <span class="status" id="status" data-state="loading"><span class="dot"></span><span id="status-text">Connecting…</span></span>
+    <button class="link-btn danger" id="open-reset" hidden>Reset all</button>
     <button class="link-btn" id="signout" hidden>Sign out</button>
   </div>
-</div>
+</header>
 <div class="notice" id="notice" hidden></div>
 
-<form class="panel login" id="login" hidden>
+<form class="card login" id="login" hidden>
+  <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></svg></span>
   <h2>Staff sign-in</h2>
+  <p class="muted">Sign in once on this device and it stays signed in.</p>
   <label>Email <input id="email" type="email" autocomplete="username" required></label>
   <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
   <p class="err" id="login-err" hidden></p>
@@ -148,12 +252,12 @@ button:disabled { opacity: .55; cursor: progress; }
   <nav class="tabs" role="tablist" id="tabs"></nav>
   <main id="main"></main>
 </div>
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button id="toast-action" hidden></button></div>
 
 <div class="modal-bg" id="reset-modal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reset-title">
     <h3 id="reset-title">Reset all queues?</h3>
-    <p style="margin:0">This sets every queue back to 001 and clears all waiting, active and on-hold numbers on every station. Type <b>RESET</b> to confirm.</p>
+    <p>This sets every queue back to 001 and clears all waiting, serving and on-hold numbers in every room. Type <b>RESET</b> to confirm.</p>
     <input id="reset-input" autocomplete="off" aria-label="Type RESET to confirm">
     <div class="row">
       <button class="btn" id="reset-cancel">Cancel</button>
@@ -183,42 +287,55 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from
 import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const SERVICES = {
-  D:   { label: 'Doctor Visit',    color: 'c-D' },
-  BT:  { label: 'Blood Test',      color: 'c-N' },
-  P:   { label: 'Procedure',       color: 'c-N' },
-  M:   { label: 'Medical Exam',    color: 'c-N' },
-  PT:  { label: 'Physiotherapist', color: 'c-PT' },
-  Den: { label: 'Dentist',         color: 'c-Den' },
+  D:   { label: 'Doctor Visit',    color: 'var(--doc)' },
+  BT:  { label: 'Blood Test',      color: 'var(--nurse)' },
+  P:   { label: 'Procedure',       color: 'var(--nurse)' },
+  M:   { label: 'Medical Exam',    color: 'var(--nurse)' },
+  PT:  { label: 'Physiotherapist', color: 'var(--physio)' },
+  Den: { label: 'Dentist',         color: 'var(--dental)' },
 };
 // rooms: how many people can serve this station at the same time. Each device
 // picks its room, and every room calls its own next patient from the shared queue.
 const STATIONS = {
-  D:     { name: 'Doctor',  room: 'Doctor Consultation', tracks: ['D'],            color: 'c-D',   tab: 'doctor', rooms: 3 },
-  Nurse: { name: 'Nurse',   room: 'Nurse Station',       tracks: ['BT', 'P', 'M'], color: 'c-N',   tab: 'nurse',  rooms: 3 },
-  PT:    { name: 'Physio',  room: 'Physiotherapy',       tracks: ['PT'],           color: 'c-PT',  tab: 'physio', rooms: 3 },
-  Den:   { name: 'Dentist', room: 'Dental',              tracks: ['Den'],          color: 'c-Den', tab: 'dental', rooms: 3 },
+  D:     { name: 'Doctor',  room: 'Doctor Consultation', tracks: ['D'],            color: 'var(--doc)',    tab: 'doctor', rooms: 3 },
+  Nurse: { name: 'Nurse',   room: 'Nurse Station',       tracks: ['BT', 'P', 'M'], color: 'var(--nurse)',  tab: 'nurse',  rooms: 3 },
+  PT:    { name: 'Physio',  room: 'Physiotherapy',       tracks: ['PT'],           color: 'var(--physio)', tab: 'physio', rooms: 3 },
+  Den:   { name: 'Dentist', room: 'Dental',              tracks: ['Den'],          color: 'var(--dental)', tab: 'dental', rooms: 3 },
 };
 // Room keys are "r1", "r2"... because Firebase turns purely numeric keys into arrays.
 const roomIds = (k) => Array.from({ length: STATIONS[k].rooms }, (_, i) => 'r' + (i + 1));
 const roomName = (k, r) => STATIONS[k].rooms > 1 ? `${STATIONS[k].room} ${r.slice(1)}` : STATIONS[k].room;
+const ticketId = (prefix, n) => `${prefix}-${String(n).padStart(3, '0')}`;
 const TABS = [
   { id: 'screener', label: 'Screener' },
   ...Object.entries(STATIONS).map(([k, s]) => ({ id: s.tab, label: s.name, station: k })),
-  { id: 'board', label: 'Waiting-room board' },
+  { id: 'board', label: 'Waiting-room TV' },
 ];
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function lsGet(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
-let toastTimer;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+let toastTimer, toastFn = null;
+function toast(msg, action, fn) {
+  $('#toast-msg').textContent = msg;
+  $('#toast-action').textContent = action || ''; $('#toast-action').hidden = !action; toastFn = fn || null;
+  $('#toast').hidden = false; clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('#toast').hidden = true; toastFn = null; }, action ? 8000 : 3000);
+}
 function setStatus(state, text) { $('#status').dataset.state = state; $('#status-text').textContent = text; }
 function showNotice(msg) { $('#notice').textContent = msg || ''; $('#notice').hidden = !msg; }
+const timeStr = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const dateStr = () => new Date().toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
+function tick() {
+  $('#clock').textContent = `${dateStr()} · ${timeStr()}`;
+  if ($('#board-clock')) { $('#board-clock').textContent = timeStr(); $('#board-date').textContent = dateStr(); }
+}
+tick(); setInterval(tick, 10000);
 
 // Firebase drops empty arrays and null values, so fill in the gaps on every read.
 function norm(raw) {
-  const s = raw || {}, out = { queues: {}, stations: {}, lastIssued: s.lastIssued || null };
+  const s = raw || {}, out = { queues: {}, stations: {} };
   for (const k of Object.keys(SERVICES)) {
     const qq = (s.queues || {})[k] || {};
     out.queues[k] = { nextSeq: qq.nextSeq || 1, waiting: qq.waiting ? Object.values(qq.waiting) : [] };
@@ -248,8 +365,11 @@ for (const k of Object.keys(STATIONS)) {
   if (fromHash) lsSet('cq_room_' + k, myRoom[k]);
 }
 const tabHash = (id) => { const st = TABS.find(t => t.id === id)?.station; return '#' + id + (st ? '/' + myRoom[st].slice(1) : ''); };
-let state = norm(null), busy = false, lastIssuedHere = null;
-const prevActive = {};
+let state = norm(null), busy = false, synced = false;
+let issuedHere = [];                       // tickets issued on this device, newest first
+const prevActive = {}, flashUntil = {};    // used to spot newly called numbers
+const recent = [];                         // recently called numbers, newest first
+let soundOn = false, audioCtx = null, tvMode = false;
 
 // ---------- setup check ----------
 if (firebaseConfig.apiKey.startsWith('PASTE')) {
@@ -282,13 +402,13 @@ async function run(action) {
 const issueTicket = (prefix) => run(async () => {
   const t = await mutate((s) => {
     const q = s.queues[prefix];
-    const ticket = `${prefix}-${String(q.nextSeq).padStart(3, '0')}`;
+    const ticket = ticketId(prefix, q.nextSeq);
+    const ahead = q.waiting.length;
     q.waiting.push(ticket); q.nextSeq += 1;
-    s.lastIssued = { ticket, label: SERVICES[prefix].label };
-    return ticket;
+    return { ticket, ahead };
   });
-  lastIssuedHere = { ticket: t, label: SERVICES[prefix].label };
-});
+  issuedHere = [{ ...t, k: prefix, label: SERVICES[prefix].label, time: timeStr(), at: Date.now() }, ...issuedHere].slice(0, 6);
+}).then(() => { if (matchMedia('(max-width: 860px)').matches) $('.ticket')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
 const callNext = (k) => run(async () => {
   const track = k === 'Nurse' ? nurseTrack : STATIONS[k].tracks[0];
   const r = myRoom[k];
@@ -310,7 +430,14 @@ const putOnHold = (k) => run(async () => {
   });
   if (!ok) toast('No number is being served right now.');
 });
-const completeCurrent = (k) => { const r = myRoom[k]; return run(() => mutate((s) => { s.stations[k][r].active = null; })); };
+const completeCurrent = (k) => { const r = myRoom[k]; return run(async () => {
+  const num = await mutate((s) => { const st = s.stations[k][r], n = st.active; st.active = null; return n; });
+  if (num) toast(`${num} cleared.`, 'Undo', () => undoComplete(k, r, num));
+}); };
+const undoComplete = (k, r, num) => run(async () => {
+  const ok = await mutate((s) => { const st = s.stations[k][r]; if (st.active) return false; st.active = num; return true; });
+  if (!ok) toast(`Can't undo: ${roomName(k, r)} is already serving another number.`);
+});
 const recallNumber = (k, num) => { const r = myRoom[k]; return run(async () => {
   const ok = await mutate((s) => {
     const st = s.stations[k][r]; if (st.active) return false;
@@ -322,94 +449,196 @@ const resetAll = () => run(async () => {
   await mutate((s) => {
     for (const k of Object.keys(s.queues)) s.queues[k] = { nextSeq: 1, waiting: [] };
     for (const k of Object.keys(s.stations)) for (const r of roomIds(k)) s.stations[k][r] = { active: null, hold: [] };
-    s.lastIssued = null;
   });
-  lastIssuedHere = null;
+  issuedHere = [];
   toast('All queues reset to 001.');
 });
+
+// ---------- sound (waiting-room TV) ----------
+function chime() {
+  if (!audioCtx) return;
+  const t0 = audioCtx.currentTime;
+  for (const [f, d] of [[880, 0], [660, 0.32]]) {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t0 + d);
+    g.gain.exponentialRampToValueAtTime(0.35, t0 + d + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.7);
+    o.connect(g).connect(audioCtx.destination); o.start(t0 + d); o.stop(t0 + d + 0.75);
+  }
+}
+function say(text) {
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text); u.rate = 0.9; speechSynthesis.speak(u);
+}
+// "BT-004" is read as "B T 4"; longer prefixes like "Den" are read as a word.
+const spoken = (t) => { const [p, n] = t.split('-'); return `${p.length <= 2 ? p.split('').join(' ') : p} ${parseInt(n, 10)}`; };
+function announce(calls) {
+  if (!soundOn) return;
+  chime();
+  setTimeout(() => calls.forEach(c => say(`Number ${spoken(c.num)}, please go to ${c.where}.`)), 900);
+}
+
+// Spot numbers that were just called anywhere, so the board can flash, list and announce them.
+function detectCalls() {
+  const fresh = [];
+  for (const k of Object.keys(STATIONS)) for (const r of roomIds(k)) {
+    const id = k + ':' + r, a = state.stations[k][r].active;
+    if (synced && a && prevActive[id] !== a) {
+      fresh.push({ num: a, where: roomName(k, r) });
+      flashUntil[id] = Date.now() + 5000;
+    }
+    prevActive[id] = a;
+  }
+  for (const c of fresh) {
+    const i = recent.findIndex(x => x.num === c.num && x.where === c.where);
+    if (i >= 0) recent.splice(i, 1);   // an undo or recall shouldn't list the same call twice
+    recent.unshift(c);
+  }
+  recent.length = Math.min(recent.length, 6);
+  if (fresh.length && currentTab === 'board') announce(fresh);
+}
 
 // ---------- rendering ----------
 const waitingFor = (k) => STATIONS[k].tracks.reduce((n, t) => n + state.queues[t].waiting.length, 0);
 const dis = () => busy ? 'disabled' : '';
 
 function screenerHTML() {
-  const last = lastIssuedHere || state.lastIssued;
-  const btn = (k, title) => `<button class="issue ${SERVICES[k].color}" data-issue="${k}" ${dis()}>
-    <span>${esc(title)}</span><small>${state.queues[k].waiting.length} waiting · next ${k}-${String(state.queues[k].nextSeq).padStart(3, '0')}</small></button>`;
-  return `<section class="panel">
-    <h2>Front door screening</h2>
-    <p class="sub">Tap the service the patient needs. The number appears on that station's screen straight away.</p>
-    <div class="issue-grid">
-      ${btn('D', 'Doctor visit')}${btn('BT', 'Nurse: Blood test')}${btn('P', 'Nurse: Procedure')}
-      ${btn('M', 'Nurse: Medical exam')}${btn('PT', 'Physiotherapist')}${btn('Den', 'Dentist')}
-    </div>
-    ${last ? `<div class="ticket" aria-live="polite"><div class="lbl">Ticket issued</div><div class="num">${esc(last.ticket)}</div><div>${esc(last.label)}</div></div>` : ''}
-  </section>`;
+  const tile = (k, group, title) => {
+    const q = state.queues[k];
+    return `<button class="issue" style="--st:${SERVICES[k].color}" data-issue="${k}" ${dis()}>
+      <span class="issue-group">${esc(group)}</span><span class="issue-title">${esc(title)}</span>
+      <span class="issue-meta"><span>Next <b>${esc(ticketId(k, q.nextSeq))}</b></span><span>${q.waiting.length} waiting</span></span></button>`;
+  };
+  const [last, ...earlier] = issuedHere;
+  const ticket = last
+    ? `<div class="ticket${Date.now() - last.at < 1500 ? ' fresh' : ''}" style="--st:${SERVICES[last.k].color}" aria-live="polite">
+        <div class="lbl">Give the patient this number</div>
+        <div class="ticket-num">${esc(last.ticket)}</div>
+        <div class="ticket-svc">${esc(last.label)}</div>
+        <div class="ticket-ahead">${last.ahead === 0 ? 'First in line' : `${last.ahead} ${last.ahead === 1 ? 'person' : 'people'} ahead`}</div></div>`
+    : `<div class="ticket blank"><div class="lbl">Ticket</div><p>Tap a service. The new number shows here in large print so the patient can see it.</p></div>`;
+  const history = earlier.length ? `<div class="issued"><h3 class="lbl">Issued earlier on this device</h3>${earlier.map(i =>
+    `<div class="issued-row"><b>${esc(i.ticket)}</b><span>${esc(i.label)}</span><span class="t">${esc(i.time)}</span></div>`).join('')}</div>` : '';
+  return `<div class="screen screener-grid">
+    <section class="card">
+      <div class="card-head"><h2>Issue a number</h2><p>Tap the service the patient needs. The number goes straight to that station.</p></div>
+      <div class="issue-grid">
+        ${tile('D', 'Doctor', 'Doctor visit')}${tile('BT', 'Nurse', 'Blood test')}${tile('P', 'Nurse', 'Procedure')}
+        ${tile('M', 'Nurse', 'Medical exam')}${tile('PT', 'Physiotherapy', 'Physiotherapist')}${tile('Den', 'Dental', 'Dentist')}
+      </div>
+    </section>
+    <aside class="card ticket-card">${ticket}${history}</aside>
+  </div>`;
 }
 
 function stationHTML(k) {
-  const s = STATIONS[k], cur = state.stations[k][myRoom[k]];
+  const s = STATIONS[k], r = myRoom[k], cur = state.stations[k][r];
   const track = k === 'Nurse' ? nurseTrack : s.tracks[0];
-  const waiting = state.queues[track].waiting;
-  const trackBar = k === 'Nurse' ? `<div class="trackbar" role="group" aria-label="Nurse queue">${s.tracks.map(t =>
-    `<button class="track" data-track="${t}" aria-pressed="${t === nurseTrack}">${esc(SERVICES[t].label)} (${t})<span class="count">${state.queues[t].waiting.length}</span></button>`).join('')}</div>` : '';
-  const roomBar = s.rooms > 1 ? `<div class="trackbar" role="group" aria-label="Which room is this device?"><span class="bar-lbl">This device is</span>${roomIds(k).map(r =>
-    `<button class="track" data-room="${r}" data-station="${k}" aria-pressed="${r === myRoom[k]}">Room ${r.slice(1)}<span class="count">${esc(state.stations[k][r].active || '--')}</span></button>`).join('')}</div>` : '';
+  const waiting = state.queues[track].waiting, next = waiting[0];
+  const roomPicker = s.rooms > 1 ? `<div class="rooms"><span class="lbl">This device is</span>
+    <div class="seg" role="group" aria-label="Which room is this device?">${roomIds(k).map(id => {
+      const a = state.stations[k][id].active;
+      return `<button class="seg-btn" data-room="${id}" data-station="${k}" aria-pressed="${id === r}"><b>Room ${id.slice(1)}</b><small class="${a ? 'mono' : ''}">${esc(a || 'Free')}</small></button>`;
+    }).join('')}</div></div>` : '';
+  const trackBar = k === 'Nurse' ? `<div class="seg wide" role="group" aria-label="Nurse queue">${s.tracks.map(t =>
+    `<button class="seg-btn" data-track="${t}" aria-pressed="${t === nurseTrack}"><b>${esc(SERVICES[t].label)}</b><small>${state.queues[t].waiting.length} waiting</small></button>`).join('')}</div>` : '';
+  const serving = cur.active
+    ? `<div class="serving on" aria-live="polite"><div class="lbl">Now serving</div><div class="big-num">${esc(cur.active)}</div>
+        <p class="hint">Press <b>I have called this number</b> to free this room for the next patient. If the patient doesn't come, put them on hold.</p></div>
+       <div class="actions">
+         <button class="btn-xl primary" data-done="${k}" ${dis()}>I have called this number</button>
+         <button class="btn-xl secondary" data-hold="${k}" ${dis()}>Put on hold</button>
+       </div>`
+    : `<div class="serving" aria-live="polite"><div class="lbl">Now serving</div><div class="big-num idle">—</div>
+        <p class="hint">${next ? `Ready. Next in line is <b>${esc(next)}</b>.` : 'No one is waiting right now.'}</p></div>
+       <div class="actions one">${next
+         ? `<button class="btn-xl primary" data-call="${k}" ${dis()}>Call next patient <span class="mono">${esc(next)}</span></button>`
+         : `<button class="btn-xl off" disabled>No one waiting</button>`}</div>`;
+  const shown = waiting.slice(0, 12);
+  const queue = waiting.length
+    ? `<ol class="queue">${shown.map((n, i) => `<li class="${i === 0 ? 'first' : ''}"><span class="pos">${i + 1}</span><b>${esc(n)}</b>${i === 0 ? '<span class="tag">Next</span>' : ''}</li>`).join('')}</ol>
+       ${waiting.length > shown.length ? `<p class="more">+ ${waiting.length - shown.length} more</p>` : ''}`
+    : '<p class="empty">No one waiting.</p>';
   const holds = cur.hold.length
-    ? cur.hold.map(n => `<div class="hold-row"><b>${esc(n)}</b><button class="recall" data-recall="${esc(n)}" data-station="${k}" ${busy || cur.active ? 'disabled' : ''}>Recall</button></div>`).join('')
-    : '<div class="empty">None</div>';
-  return `<section class="panel">
-    <h2>${esc(roomName(k, myRoom[k]))}</h2>${roomBar}${trackBar}
-    <div class="waiting">
-      <div class="waiting-head"><span>Next in line${k === 'Nurse' ? ' · ' + esc(SERVICES[track].label) : ''}</span><span>${waiting.length} waiting</span></div>
-      <div class="chips">${waiting.length ? waiting.map(n => `<span class="chip">${esc(n)}</span>`).join('') : '<span class="empty">No one waiting</span>'}</div>
-    </div>
-    <div class="now ${cur.active ? '' : 'idle'}"><div class="lbl">Now serving</div><div class="num">${esc(cur.active || '--')}</div></div>
-    <div class="actions">
-      <button class="act call" data-call="${k}" ${busy || cur.active ? 'disabled' : ''}>Call next patient</button>
-      <button class="act hold" data-hold="${k}" ${dis()}>Put on hold</button>
-      <button class="act done" data-done="${k}" ${dis()}>I have called this number</button>
-    </div>
-    <div class="holds"><h3>On hold</h3>${holds}</div>
-  </section>`;
+    ? cur.hold.map(n => `<div class="hold-row"><b>${esc(n)}</b><button class="btn" data-recall="${esc(n)}" data-station="${k}" ${busy || cur.active ? 'disabled' : ''}>Recall</button></div>`).join('')
+      + (cur.active ? '<p class="note">Clear the current number to recall someone.</p>' : '')
+    : '<p class="empty">No one on hold in this room.</p>';
+  return `<div class="screen station-grid" style="--st:${s.color}">
+    <section class="card station-main">
+      <div class="station-head">
+        <div><div class="eyebrow"><span class="sw"></span>${esc(s.name)}</div><h2>${esc(roomName(k, r))}</h2></div>
+        ${roomPicker}
+      </div>
+      ${trackBar}${serving}
+    </section>
+    <aside class="side">
+      <section class="card"><h3 class="side-h">Waiting${k === 'Nurse' ? ' · ' + esc(SERVICES[track].label) : ''}<span class="count">${waiting.length}</span></h3>${queue}</section>
+      <section class="card hold-card"><h3 class="side-h">On hold<span class="count">${cur.hold.length}</span></h3>${holds}</section>
+    </aside>
+  </div>`;
 }
 
 function boardHTML() {
-  return `<section class="panel wide">
-    <h2>Now serving</h2>
-    <p class="sub">Show this tab on the waiting-room screen. It updates by itself.</p>
-    <div class="board">${Object.entries(STATIONS).map(([k, s]) => {
-      // One tile per room that is serving; a station with no one serving still gets one idle tile.
-      const busyRooms = roomIds(k).filter(r => state.stations[k][r].active);
-      const cell = (r) => `<div class="bcell ${s.color}" data-board="${k}:${r}"><span class="room">${esc(r ? roomName(k, r) : s.room)}</span><span class="num">${esc(r ? state.stations[k][r].active : '--')}</span><span class="wait">${waitingFor(k)} waiting</span></div>`;
-      return busyRooms.length ? busyRooms.map(cell).join('') : cell(null);
-    }).join('')}
-    </div></section>`;
+  const now = Date.now();
+  const tiles = Object.entries(STATIONS).map(([k, s]) => {
+    const rows = roomIds(k).filter(r => state.stations[k][r].active).map(r =>
+      `<div class="brow${flashUntil[k + ':' + r] > now ? ' flash' : ''}">${s.rooms > 1 ? `<span class="broom">Room ${r.slice(1)}</span>` : ''}<span class="bnum">${esc(state.stations[k][r].active)}</span></div>`).join('');
+    return `<article class="btile" style="--st:${s.color}"><header><h3>${esc(s.room)}</h3><span>${waitingFor(k)} waiting</span></header>
+      ${rows || '<div class="brow idle"><span class="bnum">—</span></div>'}</article>`;
+  }).join('');
+  const rec = recent.length ? recent.map(c => `<span class="rchip"><b>${esc(c.num)}</b>${esc(c.where)}</span>`).join('')
+    : '<span class="rnone">Numbers appear here as they are called.</span>';
+  return `<section class="board">
+    <header class="board-head">
+      <div><h2>Now serving</h2><p>When your number appears, please go to that room.</p></div>
+      <div class="board-time"><div id="board-clock">${esc(timeStr())}</div><div id="board-date">${esc(dateStr())}</div></div>
+    </header>
+    <div class="board-grid">${tiles}</div>
+    <footer class="board-foot">
+      <div class="recent"><span class="lbl">Recently called</span>${rec}</div>
+      <div class="board-tools">
+        <button class="bbtn" id="sound" aria-pressed="${soundOn}">${soundOn ? 'Sound on' : 'Turn on sound'}</button>
+        <button class="bbtn" id="tv">${tvMode ? 'Exit full screen' : 'Full screen'}</button>
+      </div>
+    </footer>
+  </section>`;
 }
 
 function render() {
+  detectCalls();
   $('#tabs').innerHTML = TABS.map(t => {
-    const sw = t.station ? `<span class="sw ${STATIONS[t.station].color}"></span>` : '';
-    const count = t.station ? `<span class="count">${waitingFor(t.station)}</span>` : '';
-    return `<button class="tab" role="tab" aria-selected="${t.id === currentTab}" data-tab="${t.id}">${sw}${esc(t.label)}${count}</button>`;
-  }).join('') + `<button class="tab reset" id="open-reset">Reset all</button>`;
+    const st = t.station && STATIONS[t.station];
+    return `<button class="tab" role="tab" aria-selected="${t.id === currentTab}" data-tab="${t.id}"${st ? ` style="--st:${st.color}"` : ''}>${st ? '<span class="sw"></span>' : ''}${esc(t.label)}${st ? `<span class="count">${waitingFor(t.station)}</span>` : ''}</button>`;
+  }).join('');
   const tab = TABS.find(t => t.id === currentTab);
   $('#main').innerHTML = currentTab === 'screener' ? screenerHTML() : currentTab === 'board' ? boardHTML() : stationHTML(tab.station);
-  for (const k of Object.keys(STATIONS)) for (const r of roomIds(k)) {
-    const id = k + ':' + r, a = state.stations[k][r].active;
-    if (currentTab === 'board' && prevActive[id] !== undefined && prevActive[id] !== a && a) document.querySelector(`[data-board="${id}"]`)?.classList.add('flash');
-    prevActive[id] = a;
-  }
+  document.body.classList.toggle('tv', tvMode && currentTab === 'board');
 }
 
 // ---------- events ----------
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.tab) { currentTab = b.dataset.tab; lsSet('cq_tab', currentTab); history.replaceState(null, '', tabHash(currentTab)); render(); return; }
+  if (b.id === 'toast-action') { const fn = toastFn; $('#toast').hidden = true; toastFn = null; fn?.(); return; }
   if (b.id === 'open-reset') { $('#reset-input').value = ''; $('#reset-confirm').disabled = true; $('#reset-modal').hidden = false; $('#reset-input').focus(); return; }
   if (b.id === 'reset-cancel') { $('#reset-modal').hidden = true; return; }
   if (b.id === 'reset-confirm') { $('#reset-modal').hidden = true; resetAll(); return; }
   if (b.id === 'signout') { signOut(auth); return; }
+  if (b.id === 'sound') {
+    soundOn = !soundOn;
+    if (soundOn) {
+      try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch {}
+      chime(); setTimeout(() => say('Sound is on.'), 900);
+    }
+    render(); return;
+  }
+  if (b.id === 'tv') {
+    tvMode = !tvMode;
+    if (tvMode) document.documentElement.requestFullscreen?.().catch(() => {});
+    else if (document.fullscreenElement) document.exitFullscreen();
+    render(); return;
+  }
   if (b.dataset.issue) return issueTicket(b.dataset.issue);
   if (b.dataset.room) { myRoom[b.dataset.station] = b.dataset.room; lsSet('cq_room_' + b.dataset.station, b.dataset.room); history.replaceState(null, '', tabHash(currentTab)); render(); return; }
   if (b.dataset.track) { nurseTrack = b.dataset.track; lsSet('cq_nurse_track', nurseTrack); render(); return; }
@@ -418,6 +647,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.done) return completeCurrent(b.dataset.done);
   if (b.dataset.recall) return recallNumber(b.dataset.station, b.dataset.recall);
 });
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && tvMode) { tvMode = false; render(); } });
 $('#reset-input').addEventListener('input', (e) => { $('#reset-confirm').disabled = e.target.value.trim() !== 'RESET'; });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#reset-modal').hidden = true; });
 
@@ -432,12 +662,16 @@ $('#login').addEventListener('submit', async (e) => {
 // ---------- connect ----------
 let unsub = null;
 onAuthStateChanged(auth, (user) => {
-  $('#login').hidden = !!user; $('#app').hidden = !user; $('#signout').hidden = !user;
+  $('#login').hidden = !!user; $('#app').hidden = !user; $('#signout').hidden = !user; $('#open-reset').hidden = !user;
   if (unsub) { unsub(); unsub = null; }
-  if (!user) { setStatus('loading', 'Signed out'); return; }
+  if (!user) { setStatus('loading', 'Signed out'); document.body.classList.remove('tv'); return; }
   render();
-  unsub = onValue(stateRef, (snap) => { state = norm(snap.val()); if (!busy) render(); },
-    () => { setStatus('error', 'No access'); showNotice('This account cannot read the queue. Check the database rules in the README.'); });
+  unsub = onValue(stateRef, (snap) => {
+    state = norm(snap.val());
+    // The first snapshot is the starting point, not a fresh call, so don't announce it.
+    if (!synced) { detectCalls(); synced = true; }
+    if (!busy) render();
+  }, () => { setStatus('error', 'No access'); showNotice('This account cannot read the queue. Check the database rules in the README.'); });
 });
 onValue(ref(db, '.info/connected'), (snap) => {
   if (auth.currentUser) setStatus(snap.val() ? 'live' : 'error', snap.val() ? 'Live' : 'Offline, reconnecting…');
