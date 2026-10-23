@@ -257,7 +257,7 @@ input { font: inherit; padding: 11px 12px; border: 1px solid var(--line-2); bord
 <div class="modal-bg" id="reset-modal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reset-title">
     <h3 id="reset-title">Reset all queues?</h3>
-    <p>This sets every queue back to 001 and clears all waiting, serving and on-hold numbers in every room. Type <b>RESET</b> to confirm.</p>
+    <p>This sets every queue back to 001 and clears all waiting, serving and on-hold numbers at every counter. Type <b>RESET</b> to confirm.</p>
     <input id="reset-input" autocomplete="off" aria-label="Type RESET to confirm">
     <div class="row">
       <button class="btn" id="reset-cancel">Cancel</button>
@@ -294,22 +294,22 @@ const SERVICES = {
   PT:  { label: 'Physiotherapist', color: 'var(--physio)' },
   Den: { label: 'Dentist',         color: 'var(--dental)' },
 };
-// rooms: how many people can serve this station at the same time. Each device
-// picks its room, and every room calls its own next patient from the shared queue.
+// counters: how many people can serve this station at the same time. Each device
+// picks its counter, and every counter calls its own next patient from the shared queue.
 const STATIONS = {
-  D:     { name: 'Doctor',  room: 'Doctor Consultation', tracks: ['D'],            color: 'var(--doc)',    tab: 'doctor', rooms: 3 },
-  Nurse: { name: 'Nurse',   room: 'Nurse Station',       tracks: ['BT', 'P', 'M'], color: 'var(--nurse)',  tab: 'nurse',  rooms: 3 },
-  PT:    { name: 'Physio',  room: 'Physiotherapy',       tracks: ['PT'],           color: 'var(--physio)', tab: 'physio', rooms: 3 },
-  Den:   { name: 'Dentist', room: 'Dental',              tracks: ['Den'],          color: 'var(--dental)', tab: 'dental', rooms: 3 },
+  D:     { name: 'Doctor',  room: 'Doctor Consultation', tracks: ['D'],            color: 'var(--doc)',    tab: 'doctor', counters: 3 },
+  Nurse: { name: 'Nurse',   room: 'Nurse Station',       tracks: ['BT', 'P', 'M'], color: 'var(--nurse)',  tab: 'nurse',  counters: 3 },
+  PT:    { name: 'Physio',  room: 'Physiotherapy',       tracks: ['PT'],           color: 'var(--physio)', tab: 'physio', counters: 3 },
+  Den:   { name: 'Dentist', room: 'Dental',              tracks: ['Den'],          color: 'var(--dental)', tab: 'dental', counters: 3 },
 };
-// Room keys are "r1", "r2"... because Firebase turns purely numeric keys into arrays.
-const roomIds = (k) => Array.from({ length: STATIONS[k].rooms }, (_, i) => 'r' + (i + 1));
-const roomName = (k, r) => STATIONS[k].rooms > 1 ? `${STATIONS[k].room} ${r.slice(1)}` : STATIONS[k].room;
+// Counter keys are "r1", "r2"... because Firebase turns purely numeric keys into arrays.
+const roomIds = (k) => Array.from({ length: STATIONS[k].counters }, (_, i) => 'r' + (i + 1));
+const roomName = (k, r) => STATIONS[k].counters > 1 ? `${STATIONS[k].room} · Counter ${r.slice(1)}` : STATIONS[k].room;
 const ticketId = (prefix, n) => `${prefix}-${String(n).padStart(3, '0')}`;
 const TABS = [
   { id: 'screener', label: 'Screener' },
   ...Object.entries(STATIONS).map(([k, s]) => ({ id: s.tab, label: s.name, station: k })),
-  { id: 'board', label: 'Waiting-room TV' },
+  { id: 'board', label: 'Session IC dashboard' },
 ];
 
 const $ = (s) => document.querySelector(s);
@@ -356,7 +356,7 @@ const [hashTab, hashRoom] = location.hash.replace('#', '').split('/');
 let currentTab = TABS.some(t => t.id === hashTab) ? hashTab : lsGet('cq_tab', 'screener');
 if (!TABS.some(t => t.id === currentTab)) currentTab = 'screener';
 let nurseTrack = lsGet('cq_nurse_track', 'BT');
-// This device's room at each station. A bookmark like #doctor/2 picks room 2.
+// This device's counter at each station. A bookmark like #doctor/2 picks counter 2.
 const myRoom = {};
 for (const k of Object.keys(STATIONS)) {
   const fromHash = TABS.find(t => t.id === hashTab)?.station === k && hashRoom ? 'r' + hashRoom : null;
@@ -476,7 +476,7 @@ const spoken = (t) => { const [p, n] = t.split('-'); return `${p.length <= 2 ? p
 function announce(calls) {
   if (!soundOn) return;
   chime();
-  setTimeout(() => calls.forEach(c => say(`Number ${spoken(c.num)}, please go to ${c.where}.`)), 900);
+  setTimeout(() => calls.forEach(c => say(`Number ${spoken(c.num)}, please go to ${c.where.replace(' · ', ', ')}.`)), 900);
 }
 
 // Spot numbers that were just called anywhere, so the board can flash, list and announce them.
@@ -536,16 +536,16 @@ function stationHTML(k) {
   const s = STATIONS[k], r = myRoom[k], cur = state.stations[k][r];
   const track = k === 'Nurse' ? nurseTrack : s.tracks[0];
   const waiting = state.queues[track].waiting, next = waiting[0];
-  const roomPicker = s.rooms > 1 ? `<div class="rooms"><span class="lbl">This device is</span>
-    <div class="seg" role="group" aria-label="Which room is this device?">${roomIds(k).map(id => {
+  const roomPicker = s.counters > 1 ? `<div class="rooms"><span class="lbl">This device is</span>
+    <div class="seg" role="group" aria-label="Which counter is this device?">${roomIds(k).map(id => {
       const a = state.stations[k][id].active;
-      return `<button class="seg-btn" data-room="${id}" data-station="${k}" aria-pressed="${id === r}"><b>Room ${id.slice(1)}</b><small class="${a ? 'mono' : ''}">${esc(a || 'Free')}</small></button>`;
+      return `<button class="seg-btn" data-room="${id}" data-station="${k}" aria-pressed="${id === r}"><b>Counter ${id.slice(1)}</b><small class="${a ? 'mono' : ''}">${esc(a || 'Free')}</small></button>`;
     }).join('')}</div></div>` : '';
   const trackBar = k === 'Nurse' ? `<div class="seg wide" role="group" aria-label="Nurse queue">${s.tracks.map(t =>
     `<button class="seg-btn" data-track="${t}" aria-pressed="${t === nurseTrack}"><b>${esc(SERVICES[t].label)}</b><small>${state.queues[t].waiting.length} waiting</small></button>`).join('')}</div>` : '';
   const serving = cur.active
     ? `<div class="serving on" aria-live="polite"><div class="lbl">Now serving</div><div class="big-num">${esc(cur.active)}</div>
-        <p class="hint">Press <b>I have called this number</b> to free this room for the next patient. If the patient doesn't come, put them on hold.</p></div>
+        <p class="hint">Press <b>I have called this number</b> to free this counter for the next patient. If the patient doesn't come, put them on hold.</p></div>
        <div class="actions">
          <button class="btn-xl primary" data-done="${k}" ${dis()}>I have called this number</button>
          <button class="btn-xl secondary" data-hold="${k}" ${dis()}>Put on hold</button>
@@ -563,7 +563,7 @@ function stationHTML(k) {
   const holds = cur.hold.length
     ? cur.hold.map(n => `<div class="hold-row"><b>${esc(n)}</b><button class="btn" data-recall="${esc(n)}" data-station="${k}" ${busy || cur.active ? 'disabled' : ''}>Recall</button></div>`).join('')
       + (cur.active ? '<p class="note">Clear the current number to recall someone.</p>' : '')
-    : '<p class="empty">No one on hold in this room.</p>';
+    : '<p class="empty">No one on hold at this counter.</p>';
   return `<div class="screen station-grid" style="--st:${s.color}">
     <section class="card station-main">
       <div class="station-head">
@@ -583,7 +583,7 @@ function boardHTML() {
   const now = Date.now();
   const tiles = Object.entries(STATIONS).map(([k, s]) => {
     const rows = roomIds(k).filter(r => state.stations[k][r].active).map(r =>
-      `<div class="brow${flashUntil[k + ':' + r] > now ? ' flash' : ''}">${s.rooms > 1 ? `<span class="broom">Room ${r.slice(1)}</span>` : ''}<span class="bnum">${esc(state.stations[k][r].active)}</span></div>`).join('');
+      `<div class="brow${flashUntil[k + ':' + r] > now ? ' flash' : ''}">${s.counters > 1 ? `<span class="broom">Counter ${r.slice(1)}</span>` : ''}<span class="bnum">${esc(state.stations[k][r].active)}</span></div>`).join('');
     return `<article class="btile" style="--st:${s.color}"><header><h3>${esc(s.room)}</h3><span>${waitingFor(k)} waiting</span></header>
       ${rows || '<div class="brow idle"><span class="bnum">—</span></div>'}</article>`;
   }).join('');
@@ -591,7 +591,7 @@ function boardHTML() {
     : '<span class="rnone">Numbers appear here as they are called.</span>';
   return `<section class="board">
     <header class="board-head">
-      <div><h2>Now serving</h2><p>When your number appears, please go to that room.</p></div>
+      <div><h2>Session IC dashboard</h2><p>When your number appears, please go to that counter.</p></div>
       <div class="board-time"><div id="board-clock">${esc(timeStr())}</div><div id="board-date">${esc(dateStr())}</div></div>
     </header>
     <div class="board-grid">${tiles}</div>

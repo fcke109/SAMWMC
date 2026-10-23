@@ -1,6 +1,6 @@
 # Clinic Queue
 
-A live patient queue for the clinic: the screener issues numbers and the doctor, nurse, physio and dentist stations call them. There is also a waiting-room board. All stations share one queue through Firebase. Only ticket numbers are stored, never patient names.
+A live patient queue for the clinic: the screener issues numbers and the doctor, nurse, physio and dentist stations call them. There is also a Session IC dashboard for the waiting-room TV. All stations share one queue through Firebase. Only ticket numbers are stored, never patient names.
 
 ## Part A: Set up Firebase (free, about 10 minutes)
 
@@ -56,13 +56,13 @@ Each link opens straight to that station's screen. Sign in once on each device a
 | Nurse (BT / P / M) | https://samwmc-778b2.web.app/#nurse |
 | Physio | https://samwmc-778b2.web.app/#physio |
 | Dentist | https://samwmc-778b2.web.app/#dental |
-| Waiting-room TV | https://samwmc-778b2.web.app/#board |
+| Session IC dashboard (TV) | https://samwmc-778b2.web.app/#board |
 
-**More than one person at a station:** each station has up to 3 rooms, and each room calls its own next patient from the shared queue. Pick the room at the top of the station screen, or bookmark it directly by adding the room number, for example https://samwmc-778b2.web.app/#doctor/2 for Doctor room 2. Each device remembers its room. To change how many rooms a station has, edit `rooms: 3` in the `STATIONS` list in `index.html`.
+**More than one person at a station:** each station has up to 3 counters, and each counter calls its own next patient from the shared queue. Pick the counter at the top of the station screen, or bookmark it directly by adding the counter number, for example https://samwmc-778b2.web.app/#doctor/2 for Doctor counter 2. Each device remembers its counter. To change how many counters a station has, edit `counters: 3` in the `STATIONS` list in `index.html`.
 
 ## Daily use
 
 - **Start of day:** click **Reset all** and type `RESET` to set every queue back to 001.
-- **Waiting-room TV:** open the **Waiting-room TV** tab, press **Turn on sound** so each call plays a chime and reads the number aloud, then press **Full screen**. Sound has to be turned on again whenever the TV page is reloaded.
+- **Session IC dashboard (TV):** open the **Session IC dashboard** tab, press **Turn on sound** so each call plays a chime and reads the number aloud, then press **Full screen**. Sound has to be turned on again whenever the TV page is reloaded.
 - **Pressed "I have called this number" by mistake?** Press **Undo** in the message at the bottom of the screen within a few seconds.
 - **Changing the page later:** edit `index.html`, run `firebase deploy`, then commit and push the change to GitHub so the repository matches the live site.
